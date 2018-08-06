@@ -15,7 +15,7 @@ const options = {
 var con = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "database130899"
+  password: "123"
 });
 
 con.connect(function(err) {
