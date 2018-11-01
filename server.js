@@ -12,7 +12,7 @@ const options = {
     key: fs.readFileSync('./sslcert/privkey.pem')
 };
 
-var con = mysql.createConnection({
+let con = mysql.createConnection({
   host: "localhost",
   user: "root",
   password: "123"
@@ -23,10 +23,6 @@ con.connect(function(err) {
     console.log(err);
   }
   console.log("Connected to database");
-});
-
-let file = editJsonFile('./users.json', {
-    autosave: true
 });
 
 app.use(bodyParser.json());
@@ -49,14 +45,14 @@ app.post('/createGroup', createGroup);
 
 async function verify(token) {
   try{
-    var ticket = await client.verifyIdToken({
+    let ticket = await client.verifyIdToken({
         idToken: token,
         audience: '359401561210-5c1jiugiu8mfft88hsl1vcj5ule3h53e.apps.googleusercontent.com',
     });
-    var payload = ticket.getPayload();
-    var userid = payload['sub'];
-    var profilePic = payload['picture'];
-    var name = payload['name']
+    let payload = ticket.getPayload();
+    let userid = payload['sub'];
+    let profilePic = payload['picture'];
+    let name = payload['name']
     return [userid, profilePic, name];
   }
   catch(e){
@@ -65,11 +61,11 @@ async function verify(token) {
 }
 
 async function findUserID(username){
-  var data = file.get("users");
-  var googleData = await verify(username);
+  let data = file.get("users");
+  let googleData = await verify(username);
   if (googleData != "error"){
-    var found = false;
-    var index = 0;
+    let found = false;
+    let index = 0;
     while (!found && index < data.length){
       if (googleData[0] == data[index]["googleID"]){
         return index;
@@ -103,7 +99,7 @@ async function getStatus(req, res, next) {
 
 async function getUsers(req, res, next) {
   try {
-    var googleData = await verify(req.body.token);
+    let googleData = await verify(req.body.token);
     con.query("SELECT `groupid` FROM `pub`.`user` WHERE googleid = '"+googleData[0]+"'", function (err, result) {
        if (result.hasOwnProperty(0)){
          if (result[0].groupid != null){
@@ -130,7 +126,7 @@ async function getUsers(req, res, next) {
 
 async function getLastPub(req, res, next) {
   try {
-    var googleData = await verify(req.body.token);
+    let googleData = await verify(req.body.token);
     con.query("SELECT `groupid` FROM `pub`.`user` WHERE googleid = '"+googleData[0]+"'", function (err, result) {
        if (result.hasOwnProperty(0)){
          if (result[0].groupid != null){
@@ -157,7 +153,7 @@ async function getLastPub(req, res, next) {
 
 async function authenticateUser(req, res, next) {
   try {
-    var googleData = await verify(req.body.token);
+    let googleData = await verify(req.body.token);
     con.query("SELECT `username`,`groupid` FROM `pub`.`user` WHERE googleid = '"+googleData[0]+"'", function (err, result) {
        if (result.hasOwnProperty(0)){
          if (result[0].groupid != null){
@@ -195,7 +191,7 @@ async function authenticateUser(req, res, next) {
 
 async function setDrink(req, res, next) {
   try {
-    var googleData = await verify(req.body.token);
+    let googleData = await verify(req.body.token);
     if (validate(req.body.drink) == true){
       if (googleData[0] != "e"){
         con.query("UPDATE `pub`.`user` SET drink = '"+req.body.drink+"' WHERE googleID ='"+googleData[0]+"'", function (err, result) {
@@ -226,7 +222,7 @@ async function setDrink(req, res, next) {
 
 async function setUsername(req, res, next) {
   try {
-    var googleData = await verify(req.body.token);
+    let googleData = await verify(req.body.token);
     if (validate(req.body.newUsername) == true){
       if (googleData[0] != "e"){
         con.query("UPDATE `pub`.`user` SET username = '"+req.body.newUsername+"' WHERE googleID ='"+googleData[0]+"'", function (err, result) {
@@ -257,7 +253,7 @@ async function setUsername(req, res, next) {
 
 async function setDistance(req, res, next) {
   try {
-    var googleData = await verify(req.body.token);
+    let googleData = await verify(req.body.token);
     if (req.body.newDistance < 1000 && req.body.newDistance != "" && req.body.newDistance >= 0 && req.body.newDistance != null){
       if (googleData[0] != "e"){
         con.query("UPDATE `pub`.`user` SET distance = '"+req.body.newDistance+"' WHERE googleID ='"+googleData[0]+"'", function (err, result) {
@@ -288,7 +284,7 @@ async function setDistance(req, res, next) {
 
 async function setGroup(req, res, next){
   try{
-    var googleData = await verify(req.body.token);
+    let googleData = await verify(req.body.token);
     con.query("SELECT * FROM `pub`.`group` WHERE groupid = '"+req.body.group+"'", function (err, result) {
        if (result.hasOwnProperty(0)){
          con.query("SELECT * FROM `pub`.`user` WHERE googleid = '"+googleData[0]+"'", function (err, result) {
@@ -328,7 +324,7 @@ async function setGroup(req, res, next){
 
 async function createGroup(req, res, next){
   try{
-    var googleData = await verify(req.body.token);
+    let googleData = await verify(req.body.token);
     if (checkSymbols(req.body.groupid) && checkSymbols(req.body.groupname)&& (req.body.groupid).length <= 50 && (req.body.groupname).length <= 50){
       con.query("SELECT * FROM `pub`.`user` WHERE googleid = '"+googleData[0]+"'", function (err, result) {
         if (result.hasOwnProperty(0) && result[0].groupid == null){
@@ -376,7 +372,7 @@ async function createGroup(req, res, next){
 }
 
 async function checkSymbols(text){
-  var format = /^[a-zA-Z0-9- ,_]*$/;
+  let format = /^[a-zA-Z0-9- ,_]*$/;
   return format.test(text);
 }
 
